@@ -1,0 +1,34 @@
+# node modules — встановлюються через npm
+node_modules/
+
+# лог-файли
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# тимчасові файли ОС
+.DS_Store
+Thumbs.db
+
+# середовище (наприклад, змінні конфігурації)
+.env
+
+# логи
+logs
+*.log
+logs/**/*.log
+
+# кеш
+.cache/
+dist/
+tmp/
+temp/
+
+# система IDE/редакторів (якщо ти використовуєш VS Code або інше)
+.vscode/
+.idea/
+.cursor/
+
+# інші потенційно зайві файли
+*.swp
+*.swo
