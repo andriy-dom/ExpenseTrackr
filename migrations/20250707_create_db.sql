@@ -26,8 +26,8 @@ CREATE TABLE Expenses (
 
 CREATE TABLE ExchangeRates (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    base_currency VARCHAR(3) NOT NULL,
-    target_currency VARCHAR(3) NOT NULL,
-    rate DECIMAL(12, 6) NOT NULL,
-    updated_at DATETIME NOT NULL
+    base_currency VARCHAR(3),
+    target_currency VARCHAR(3),
+    rate DECIMAL(12, 6),
+    updated_at DATETIME
 );
