@@ -4,8 +4,11 @@
     import db from '../db.ts';
     import { User } from '../controllers/auth.ts'
    
+    export interface AuthRequest extends Request {
+        user?: User;
+      }
 
-    export default async (req: Request, res: Response, next: NextFunction) => {
+    export default async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             const authHeader = req.headers.authorization;
 

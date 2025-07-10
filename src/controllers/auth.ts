@@ -22,13 +22,11 @@
         try {
             const [resultEmail] = await db.query(`SELECT id FROM Users WHERE email = ?`, [email]);
 
-            if ([resultEmail].length > 0) {
-                //користувач вже існує, потрібно відправити помилку
-                res.status(409).json({
-                    message: 'This email is busy, try another one'
-                }) 
+            if (resultEmail.length > 0) {
+                res.status(409).json({ message: 'This email is busy, try another one' }) 
                 return;
             }
+            
             const salt = bcrypt.genSaltSync(10);
             const hashPassword = bcrypt.hashSync(password, salt);
 
@@ -51,28 +49,31 @@
         try {
             const [resultCheckUser]: [User[]] = await db.query(`SELECT id, password_hash, is_blocked FROM Users WHERE email = ?`, [email])
 
-            if (resultCheckUser.length !> 0) {
+            if (resultCheckUser.length === 0) {
                 res.status(404).json({message: 'No user with this email was found'});
                 return;
             }    
-                const passwordResult: string = bcrypt.compareSync(password, resultCheckUser[0].password);
+
+            const user = resultCheckUser[0]
+            const passwordResult = bcrypt.compareSync(password, user.password_hash);
                 
-                if (!passwordResult) {
-                    res.status(401).json({message: 'Passwords do not match, try again'});
-                    return;
-                };
-    
-                if(resultCheckUser[0].is_blocked){
-                    return res.status(403).json({ message: 'Your account is blocked' });
-                }
+            if (!passwordResult) {
+                res.status(401).json({message: 'Passwords do not match, try again'});
+                return;
+            };
+
+            if(user.is_blocked){
+                res.status(403).json({ message: 'Your account is blocked' });
+                return;
+            }
             
-                const token = jwt.sign({
-                    email: email,
-                    userId: resultCheckUser[0].id
-                }, keys.jwt, {expiresIn: 60 * 60});
-                res.status(200).json({
-                    token: `Bearer ${token}`
-                })
+            const token = jwt.sign({
+                email: email,
+                userId: user.id
+            }, keys.jwt, {expiresIn: 60 * 60});
+            res.status(200).json({
+                token: `Bearer ${token}`
+            })
         } catch (error) {
             errorHandler(res, error);
         } 

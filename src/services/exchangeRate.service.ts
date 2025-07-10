@@ -1,5 +1,6 @@
+// Сервіс для отримання та збереження курсів валют
+
     import axios from "axios";
-    import { Request, Response } from "express";
     import db from '../db.ts';
 
     type RateResponse = {
@@ -24,7 +25,7 @@
                 const rates = response.data.rates;
                 const updatedAt = new Date();
 
-                for (const [targetCurrency, rate] of Object.entries(rates)) {
+                for (const [targetCurrency, rate] of Object.entries(rates)) {  //[["EUR", 0.92], ["UAH", 40.1], ...]
                 await db.execute(
                     `INSERT INTO ExchangeRates (base_currency, target_currency, rate, updated_at)
                     VALUES (?, ?, ?, ?)

@@ -2,14 +2,17 @@
     import { 
         getExpenses,
         createExpenses,
-        deleteExpenses
+        deleteExpenses,
+        getStats
     } from '../controllers/expenses.ts';
+    import authMiddleware from '../middleware/authMiddleware.ts'
 
     const router = express.Router();
 
-    //localhost:3000/auth
-    router.get('/:id', getExpenses);
-    router.post('/', createExpenses);
-    router.delete('/:id', deleteExpenses);
+    //localhost:3000/expenses
+    router.get('/:id', authMiddleware, getExpenses);
+    router.post('/', authMiddleware, createExpenses);
+    router.delete('/:id', authMiddleware, deleteExpenses);
+    router.get('/stats', authMiddleware, getStats);
 
     export default router; 

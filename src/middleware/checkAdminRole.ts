@@ -1,7 +1,8 @@
-    import { Request, Response, NextFunction } from "express";
+    import { Response, NextFunction } from "express";
+    import { AuthRequest } from '../middleware/authMiddleware'
     
     export default function checkRole(role: string) {
-        return (req: Request, res: Response, next: NextFunction) => {
+        return (req: AuthRequest, res: Response, next: NextFunction) => {
             if(!req.user) {
                 return res.status(401).json({
                 message: 'User acquisition error'

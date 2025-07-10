@@ -6,7 +6,7 @@ const db = await mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: keys.password,
-    database: 'expenses_tracker'
+    database: 'expenses_trackr'
 })
 
 export default db;
