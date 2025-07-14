@@ -14,7 +14,7 @@
 
     export async function fetchAndSaveRates(): Promise<void> {
         try {
-            const response = await axios.get<RateResponse>('https://api.exchangerate.host/latest', {
+            const response = await axios.get<RateResponse>('https://open.er-api.com/v6/latest', {
                 params: {
                 base: BASE_CURRENCY,
                 symbols: TARGET_CURRENCIES.join(","),
@@ -35,7 +35,7 @@
                     [BASE_CURRENCY, targetCurrency, rate, updatedAt]
                 );
                 }
-
+                console.log(rates);
                 console.log(`[ExchangeRate] Rates updated at ${updatedAt.toISOString()}`);
         } catch (error) {
             console.error("Error fetching exchange rates:", error);
