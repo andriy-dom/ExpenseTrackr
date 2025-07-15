@@ -14,11 +14,19 @@
         date: string
     }
 
-    const getExpenses = async (req: AuthRequest, res: Response): Promise<void> => {
-        const id = req.params.id;
+    interface ExchangeRates {
+        base_currency: string,
+        target_currency: string,
+        rate: number
+    }
+
+    const getUserExpenses = async (req: AuthRequest, res: Response): Promise<void> => {
+        const userId = req.user.id;
+        const baseUrl = 'http://localhost:3000/expenses'
         try {
-            const [expenses] = await db.query(`SELECT amount, currency, category, description, date FROM Expenses WHERE id = ?`, [id]);
-            res.status(200).json(expenses)
+            const [expenses]: [Expenses[]] = await db.query(`SELECT id, amount, currency, category, description, date FROM Expenses WHERE user_id = ?`, [userId]);
+            const expensesWithUrl = expenses.map(expense => ({ expense, delete:`${baseUrl}/${expense.id}` }))
+            res.status(200).json(expensesWithUrl)
         } catch (error) {
             errorHandler(res, error)
         }
@@ -27,9 +35,8 @@
     const getStats = async (req: AuthRequest, res: Response): Promise<void> => {
         try {
             const userId = req.user.id;
-            const {period = "mounth", currency = "UAH" } = req.query;
+            const { period = "mounth", currency = "UAH" } = req.query;
             const targetCurrency = String(req.query.currency || "UAH");
-
             const today = new Date();
             let startDate: string;
 
@@ -40,12 +47,12 @@
                 const month = String(today.getMonth() + 1).padStart(2, "0"); //07
                 startDate = `${year}-${month}-01`;
             }
-
+            
             // Отримуємо всі витрати користувача за цей період
-            const [expenses] = await db.execute(`SELECT category, amount, currency FROM Expenses WHERE user_id = ? AND date >= ?`, [userId, startDate]);
+            const [expenses]: [ Expenses[] ] = await db.execute(`SELECT category, amount, currency FROM Expenses WHERE user_id = ? AND date >= ?`, [userId, startDate]);
 
             //Отримуємо курси валют з бази
-            const [rates] = await db.execute(`SELECT base_currency, target_currency, rate FROM ExchangeRates WHERE target_currency = ?`, [targetCurrency])
+            const [rates]: [ ExchangeRates[] ] = await db.execute(`SELECT base_currency, target_currency, rate FROM ExchangeRates WHERE target_currency = ?`, [targetCurrency])
 
             // Формуємо map для швидкого доступу до курсів
             const rateMap = new Map<string, number>(); // створює порожню мапу для зберігання курсів валют
@@ -58,28 +65,27 @@
                 }
             }
 
-            const totals: { [category: string]: number } = {}; // створює порожній об'єкт для зберігання сум по категоріях
+            const totals: { [category: string]: number } = {}; // створює порожній об'єкт для зберігання сум по категоріях. [category: string]-Це не масив, а об’єкт із довільними ключами-рядками.
 
             for (const exp of expenses) {
                 const rate = exp.currency === targetCurrency ? 1 : rateMap.get(exp.currency);
 
-                if (!rate) continue;
+                if (!rate) continue; //цей запис пропускається і цикл переходить до наступної витрати.
                 
                 const amount = Number(exp.amount) * rate;
 
                 if (!totals[exp.category]) {
-                    totals[exp.category] = 0;
+                    totals[exp.category] = 0; //створюємо порожню категорію з початковим значенням 0.
                 }
 
                 totals[exp.category] += amount;
             }
-
+            
             res.status(200).json({
                 period,
                 currency: targetCurrency,
                 totals
             })
-
         } catch (error) {
             errorHandler(res, error);
         }
@@ -98,16 +104,24 @@
 
     const deleteExpenses = async (req: AuthRequest, res: Response): Promise<void> => {
         const id = req.params.id;
+        const userId = req.user?.id; 
         try {
-            await db.query(`DELETE FROM Expenses WHERE id = ?`, [id]);
-            res.status(200).json({ message: `Expenses where id: ${id}, succsessfully deleted!`})
+            const [result] = await db.query<ResultSetHeader>(
+                `DELETE FROM Expenses WHERE id = ? AND user_id = ?`,
+                [id, userId]
+            );
+            if (result.affectedRows === 0) { //affectedRows - це властивість, яка показує, скільки рядків було вплинуто на базу даних.
+                res.status(404).json({ message: "Expense not found or not yours" });
+                return;
+            }
+            res.status(200).json({ message: `Expense with id: ${id} successfully deleted!` });
         } catch (error) {
             errorHandler(res, error)
         }
     }
     
     export {
-        getExpenses,
+        getUserExpenses,
         createExpenses,
         deleteExpenses,
         getStats

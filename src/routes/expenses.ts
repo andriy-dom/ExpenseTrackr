@@ -1,6 +1,6 @@
     import express from 'express';
     import { 
-        getExpenses,
+        getUserExpenses,
         createExpenses,
         deleteExpenses,
         getStats
@@ -10,9 +10,10 @@
     const router = express.Router();
 
     //localhost:3000/expenses
-    router.get('/:id', authMiddleware, getExpenses);
     router.post('/', authMiddleware, createExpenses);
     router.delete('/:id', authMiddleware, deleteExpenses);
     router.get('/stats', authMiddleware, getStats);
+    router.get('/', authMiddleware, getUserExpenses);
+
 
     export default router; 
