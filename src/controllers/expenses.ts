@@ -3,22 +3,8 @@
     import db from '../db.ts';
     import { AuthRequest } from '../middleware/authMiddleware'
     import errorHandler from '../utils/errorHandler.ts';
-
-    interface Expenses {
-        id?: number
-        user_id: number, 
-        category: string, 
-        amount: string, 
-        currency: string, 
-        description: string, 
-        date: string
-    }
-
-    interface ExchangeRates {
-        base_currency: string,
-        target_currency: string,
-        rate: number
-    }
+    import { ExchangeRates } from '../types/ExchangeRates.ts';
+    import { Expenses } from '../types/Expenses.ts';
 
     const getUserExpenses = async (req: AuthRequest, res: Response): Promise<void> => {
         const userId = req.user.id;
