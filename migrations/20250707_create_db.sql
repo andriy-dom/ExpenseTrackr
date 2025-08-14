@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS expenses_trackr;
-USE expenses_trackr;
+CREATE DATABASE IF NOT EXISTS expenses_tracker;
+USE expenses_tracker;
 
 CREATE TABLE IF NOT EXISTS Users (
     id INT AUTO_INCREMENT PRIMARY KEY,
